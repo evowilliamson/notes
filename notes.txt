@@ -1,0 +1,31 @@
+15-01-2020
+
+sudo apt install network-manager-fortisslvpn-gnome
+
+16-01-2020
+VPN
+sudo openfortivpn -c openfortivpn.conf --pppd-log=/tmp/vpn.out.txt
+
+install virtualbox 6
+install vagrant last version
+
+EFI virtualbox problem:
+https://stegard.net/2016/10/virtualbox-secure-boot-ubuntu-fail/
+
+sudo -i
+mkdir /root/module-signing
+cd /root/module-signing
+openssl req -new -x509 -newkey rsa:2048 -keyout MOK.priv -outform DER -out MOK.der -nodes -days 36500 -subj "/CN=virtualbox/"
+chmod 600 MOK.priv 
+mokutil --import /root/module-signing/MOK.der
+-- reboot
+-- run:
+
+#!/bin/bash
+
+for modfile in $(dirname $(modinfo -n vboxdrv))/*.ko; do
+  echo "Signing $modfile"
+  /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 \
+                                /root/module-signing/MOK.priv \
+                                /root/module-signing/MOK.der "$modfile"
+done
