@@ -29,3 +29,204 @@ for modfile in $(dirname $(modinfo -n vboxdrv))/*.ko; do
                                 /root/module-signing/MOK.priv \
                                 /root/module-signing/MOK.der "$modfile"
 done
+
+20-01-2020
+Report time on top stories
+Ask Bas about Jira
+SHX-283 all sources
+
+:~/vz/smtvagrant/config/shx 
+configuration for FE and BE host/guest
+Put backend on host in order to run the backend on the host and the front end on the vagrant guest
+
+FE:
+Installed nodejs
+curl -sL https://deb.nodesource.com/setup_13.x | sudo bash -
+sudo apt-get install -y nodejs
+
+BE:
+Install gradle
+wget https://services.gradle.org/distributions/gradle-6.1-bin.zip
+sudo unzip -d /opt/gradle /tmp/gradle-6.1.zip
+
+shx-start starten shx services
+npm i: install front end
+
+shx-data-reset
+bkohl@ilionx.com
+test
+
+https://shx.smtvagrant.ilionx.cloud/
+
+21-01-2020
+SMCOPS-1714 overige scrumtaken
+
+
+select check0_.id as id1_8_, check0_.created as created2_8_, check0_.detached as detached3_8_, 
+check0_.host as host4_8_, check0_.name as name5_8_, check0_.source_id as source_i7_8_, 
+check0_.source_name as source_n6_8_ 
+from shx_check check0_ 
+where check0_.source_id=2 and (((lower(check0_.host)||?)||lower(check0_.name)) like ?) and (check0_.id not in  (4 , 5)) 
+order by check0_.host asc, check0_.name asc limit ?
+
+select check0_.id as id1_8_, check0_.created as created2_8_, check0_.detached as detached3_8_, 
+check0_.host as host4_8_, check0_.name as name5_8_, check0_.source_id as source_i7_8_, 
+check0_.source_name as source_n6_8_ 
+from shx_check check0_ 
+where check0_.source_id=2 and (((lower(check0_.host)||?)||lower(check0_.name)) like ?) 
+order by check0_.host asc, check0_.name asc limit ?
+
+
+
+  /**
+     * Takes the searchSpecification created by metaData, and adds a predicate to that for our custom exclusion of check ids
+     */
+    public Specification<Check> addExcludesIdsSpecification(
+            final Specification<nl.vodafoneziggo.smc.shx.core.model.Check> searchSpecification,
+            final List<String> excludedIdsList) {
+        return (Specification<nl.vodafoneziggo.smc.shx.core.model.Check>) (root, query, criteriaBuilder) -> {
+            final Predicate otherCriteria = searchSpecification.toPredicate(root, query, criteriaBuilder);
+            CriteriaBuilder.In<Integer> inClausePredicate = criteriaBuilder.in(root.get(ID));
+            for (String id : excludedIdsList) {
+                inClausePredicate.value(Integer.parseInt(id));
+            }
+            Predicate notInClausePredicate = criteriaBuilder.not(inClausePredicate);
+
+            if (CheckMetaData.isEmpty(otherCriteria)) {
+                return notInClausePredicate;
+            }
+            else {
+                return criteriaBuilder.and(otherCriteria, notInClausePredicate);
+            }
+        };
+    }
+
+
+
+
+package nl.vodafoneziggo.smc.shx.core.metadata;
+
+import nl.vodafoneziggo.smc.shx.common.util.search.AbstractSortSearchMetaData;
+import nl.vodafoneziggo.smc.shx.common.util.search.SearchType;
+import nl.vodafoneziggo.smc.shx.core.model.Check;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static nl.vodafoneziggo.smc.shx.common.util.search.JpaSearchSpecification.LIKE_CHARACTER;
+
+/**
+ * Contains frontend field mapping to entity properties and search types for Users.
+ */
+@Component
+public class CheckMetaData extends AbstractSortSearchMetaData {
+
+    /**
+     * Field and column name for the name of the User.
+     */
+    public static final String DISPLAY_NAME = "displayName";
+
+    /**
+     * host column.
+     */
+    public static final String HOST = "host";
+
+    /**
+     * name column.
+     */
+    public static final String NAME = "name";
+
+    /**
+     * source column.
+     */
+    public static final String SOURCE_ID = "source";
+
+    /**
+     * id column.
+     */
+    public static final String ID = "id";
+
+    /**
+     * Space character for multi word separation.
+     */
+    public static final String SPACE_CHAR = " ";
+
+    /**
+     * excluded ids
+     */
+
+    public static final String EXCLUDED_IDS = "excludedIds";
+
+    /**
+     * Constructor.
+     */
+    public CheckMetaData() {
+        super();
+        addField(DISPLAY_NAME, null, SearchType.MULTI_WORD, false);
+        addField(NAME, NAME, SearchType.NONE, true);
+        addField(HOST, HOST, SearchType.NONE, true);
+        addField(SOURCE_ID, SOURCE_ID, SearchType.NUMBER, false);
+        addField(ID, null, SearchType.NONE, false);
+    }
+
+
+
+    public Page<Check> searchChecks(final SortablePageInput input) {
+        final Map<String, String> sortOrder = new ConcurrentHashMap<>();
+        sortOrder.put(HOST, ASC);
+        sortOrder.put(NAME, ASC);
+        input.setSortOrder(sortOrder);
+        Specification<Check> searchSpecification =
+                new JpaSearchSpecification<Check>(checkMetaData.toSearchCriteria(input.getSearchInputs()));
+        for (final SearchInput searchInput : input.getSearchInputs()) {
+            if (DISPLAY_NAME.equals(searchInput.getFieldName())) {
+                searchSpecification = checkMetaData.addMultiWordSpecification(searchSpecification, searchInput.getTextValue());
+            }
+            else if (EXCLUDED_IDS.equals(searchInput.getFieldName())) {
+                searchSpecification = checkMetaData.addExcludesIdsSpecification(searchSpecification, searchInput.getTextValueList());
+            }
+        }
+        return searchPage(input, checkMetaData, searchSpecification, checkRepository);
+    }
+
+searchChecksWithSourceIdAndDisplayNameExcludesSomeIdsTest
+
+searchChecksWithSourceIdAndDisplayNameExcludesAllIdsTest
+
+
+30-10-2020
+
+Sorting ungrouped :
+
+1. bia config sortOrder
+2. :
+ case "SOFT-CRITICAL":
+            return 6;
+        case "SOFT-WARNING":
+            return 5;
+        case "SOFT-UNKNOWN":
+            return 4;
+        case "HARD-CRITICAL":
+            return 3;
+        case "HARD-WARNING":
+            return 2;
+        case "HARD-UNKNOWN":
+            return 1;
+        case "HARD-PENDING":
+        case "UNINITIATED":
+        case "HARD-OK":
+        case "SOFT-OK":
+        default:
+            return 0;
+
+3. most recent
+
+
+
+
+
