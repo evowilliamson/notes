@@ -232,4 +232,98 @@ start Front end FE:
 npm start
 
 
+19-02-2020
+vf-access in q24 github
+https://github.com/Q24/vf-access.git
+http://gitlab.ahdnag05:6002/its/smtvagrant.git
 
+http://gitlab.ahdnag05:6002/its/statehistory-x.git
+
+https://github.com/systemd/systemd/issues/12401
+linger issue
+
+21-02-2020
+vagrant provision
+vagrant ssh then shx-data-reset to reset data
+vagrant ssh then show-services to check if services are up 
+
+sz-data-reset
+sz-
+Pre-request
+
+const echoPostRequest = {
+  url: 'https://shx.smtvagrant.ilionx.cloud/rest/public/login',
+  method: 'POST',
+  header: 'Content-Type:application/json',
+  body: {
+    mode: 'application/json',
+    raw: JSON.stringify(
+        {
+			"email":"nramaekers@ilionx.com",
+			"password":"test"
+        })
+  }
+};
+
+var getToken = true;
+if (getToken === true) {
+    pm.sendRequest(echoPostRequest, function (err, res) {
+    console.log(err ? err : res.json());
+        if (err === null) {
+            console.log('Saving the token and expiry date')
+            var responseJson = res.json();
+            pm.environment.set('currentAccessToken', responseJson.user.token)
+        }
+    });
+}
+
+
+26-02-2020
+ng serve --host 0.0.0.0 if:
+[Wed Feb 26 10:47:00.157693 2020] [proxy:error] [pid 10:tid 140013241854752] (111)Connection refused: AH00957: HTTP: attempt to connect to 172.28.128.1:4200 (172.28.128.1) failed
+[Wed Feb 26 10:47:00.157773 2020] [proxy_http:error] [pid 10:tid 140013241854752] [client 172.17.0.7:49984] AH01114: HTTP: failed to make connection to backend: 172.28.128.1
+not 
+ng serve
+
+
+
+05-03-2020
+https://inbucket.smtvagrant.ilionx.cloud/monitor
+
+
+
+30-03-2020
+
+shx-xxxx
+/projects/smtvagrant/environment/shx/.bashrc
+
+export ACC_DB_USER=acc_sh_dev_shx
+export ACC_DB_PASS=iAbgfBtUIOEaGuxmn1Fs
+export HOST_IP=10.0.2.2
+export ACC_DB_PORT=3310
+
+mysql -u ${ACC_DB_USER} -p${ACC_DB_PASS} -h ${HOST_IP} -P ${ACC_DB_PORT}
+
+local intellij
+
+export HOST_IP=localhost
+
+
+01-04-2020
+ssh -L 1526:nlehv1rem01.libertel:1521 nlehv1jvsh04
+Deze sessie openene tijdelijk om naar 1525 te gaan.
+
+smcops-1714
+code voor het schrijven van meetings
+
+
+04-04-2020
+
+select table_schema as database_name,
+       table_name as view_name
+from information_schema.views;
+
+
+16-04-2020
+
+kahea
