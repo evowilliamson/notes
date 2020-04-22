@@ -327,3 +327,5 @@ from information_schema.views;
 16-04-2020
 
 kahea
+build.gradle kahea/backend/kahea. Line 39 change to https
+sudo do-install statehistory-data
