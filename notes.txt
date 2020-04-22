@@ -329,3 +329,35 @@ from information_schema.views;
 kahea
 build.gradle kahea/backend/kahea. Line 39 change to https
 sudo do-install statehistory-data
+do-install import-statehistory-data 
+mysql -u ${DATABASE_USER} -p"${DATABASE_PASSWORD}" -e "UPDATE statehistory.members SET password = '\$2y\$10\$EYmznoEltvK7z7YW8OlgK.JBvHQIVK3VqlJgE4BAYDfbW2Ch4gAXG' WHERE username = 'kay.canoot'"
+
+pw aanpassen
+http://kahea-src:8888/
+
+
+
+
+Ik krijg de volgende melding indien ik "vagrant up" doe:
+
+11:20
+
+
+ired...
+==> default: Mounting NFS shared folders...
+The following SSH command responded with a non-zero exit status.
+Vagrant assumes that this means the command failed!
+
+mount -o vers=3,udp,nolock,fsc 172.28.128.1:/home/ivo/vz /projects
+
+Stdout from the command:
+
+Stderr from the command:
+
+mount.nfs: requested NFS version or transport protocol is not supported
+
+Mon, Apr 20, 2020
+ivo profile image	
+ivo
+11:15
+Dit werd veroorzaakt door duplicate entries in /etc/exports
