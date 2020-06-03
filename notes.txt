@@ -361,3 +361,522 @@ ivo profile image
 ivo
 11:15
 Dit werd veroorzaakt door duplicate entries in /etc/exports
+
+03-06-2020
+----------
+
+AFter vagrant up clean machine:
+
+vagrant@smtvagrant ~]$ shx-logs-backend
+..
+..
+..
+Caused by: liquibase.exception.DatabaseException: java.sql.SQLNonTransientConnectionException: Could not connect to address=(host=mariadb-mariadb-service)(port=3306)(type=master) : mariadb-mariadb-service
+    at liquibase.database.DatabaseFactory.openConnection(DatabaseFactory.java:254)
+    at liquibase.database.DatabaseFactory.openDatabase(DatabaseFactory.java:149)
+    at liquibase.integration.commandline.CommandLineUtils.createDatabaseObject(CommandLineUtils.java:97)
+    ... 3 common frames omitted
+Caused by: java.sql.SQLNonTransientConnectionException: Could not connect to address=(host=mariadb-mariadb-service)(port=3306)(type=master) : mariadb-mariadb-service
+    at org.mariadb.jdbc.internal.util.ExceptionMapper.get(ExceptionMapper.java:137)
+    at org.mariadb.jdbc.internal.util.ExceptionMapper.getException(ExceptionMapper.java:101)
+    at org.mariadb.jdbc.internal.util.ExceptionMapper.throwException(ExceptionMapper.java:91)
+    at org.mariadb.jdbc.Driver.connect(Driver.java:109)
+    at liquibase.database.DatabaseFactory.openConnection(DatabaseFactory.java:246)
+    ... 5 common frames omitted
+Caused by: org.mariadb.jdbc.internal.util.dao.QueryException: Could not connect to address=(host=mariadb-mariadb-service)(port=3306)(type=master) : mariadb-mariadb-service
+    at org.mariadb.jdbc.internal.protocol.AbstractConnectProtocol.connectWithoutProxy(AbstractConnectProtocol.java:827)
+    at org.mariadb.jdbc.internal.util.Utils.retrieveProxy(Utils.java:469)
+
+
+[vagrant@smtvagrant ~]$ mysql
+ERROR 2002 (HY000): Can't connect to MySQL server on '172.28.128.137' (115)
+[vagrant@smtvagrant ~]$ ```
+
+	
+vernier
+09:34
+Ja ik mis de database en andere services die nodig zijn
+	
+ik zou even een vagrant destroy && vagrant up doen
+
+cat openfortivpn.conf.bck 
+host = vpn.qnh.nl
+port = 443
+username = ivo.willemsen@qnh.nl
+password = VPN@QNH2020!
+trusted-cert = 179649fc153676862336b283570fb88c4343f347cb570fc756547bd48df57d9di
+
+Daar zat die ssh
+
+in de trusted-cert
+
+	
+croijakkers
+09:54
+nee, dat is nog steeds je vpn
+
+	
+ivo
+09:54
+mmmm
+
+vreemd dat het voorheen dan wel werkte
+
+heb een upgrade naar 20.20 uitgevoerd, mislukt
+
+Zit met een kale ubuntu
+
+	
+croijakkers
+09:54
+je moet echt dit soort processen hebben draaien
+
+cedric      3503    1561  0 08:50 ?        00:00:00 /usr/bin/ssh tunnels-hqsshgw01-zone1 -NT -oServerAliveInterval=5 -oServerAliveCountMax=2
+cedric      3505    1561  0 08:50 ?        00:00:02 /usr/bin/ssh tunnels-nlvir1ngh01rm1 -NT -oServerAliveInterval=5 -oServerAliveCountMax=2
+cedric      3999    1561  0 08:50 ?        00:00:00 /usr/bin/ssh tunnels-nl0553yr.dc-ratingen.de -NT -oServerAliveInterval=5 -oServerAliveCountMax=2
+cedric      4001    1561  0 08:50 ?        00:00:00 /usr/bin/ssh tunnels-nl0926yr.dc-ratingen.de -NT -oServerAliveInterval=5 -oServerAliveCountMax=2
+cedric      4002    1561  0 08:50 ?        00:00:00 /usr/bin/ssh tunnels-tlu1b.oss.local -NT -oServerAliveInterval=5 -oServerAliveCountMax=2
+heb je ubuntu opnieuw geinstalleerd?
+
+	
+ivo
+09:55
+ja
+
+	
+croijakkers
+09:55
+ja, dan moet je je ssh tunnels ook terug installeren als systemd service
+
+staat in de vf-access repo hoe dat werkt
+
+	
+ivo
+09:55
+kan ik daar bij zonder vpn 
+
+	
+croijakkers
+09:55
+ja, github
+
+	
+ivo
+09:55
+ik ga eens kijken
+
+die upgrade was een ramp trouwens
+
+Zit jij al op 20.20 ?
+
+	
+croijakkers
+09:56
+20.04 ja
+
+upgrade ging probleemloos
+
+	
+ivo
+09:56
+mmmm
+
+	
+croijakkers
+09:57
+ik kwam wel van 19.10 he
+
+	
+ivo
+09:57
+ik ook
+
+	
+ivo
+10:26
+Ik krijjg de volgende melding op SMC_ziggo:
+
+ivo@ivo-ThinkPad-P53:~/.config/systemd/user$ systemctl --user start sshtunnel-@tunnels-tlu1b.oss.local.service.d
+Job for sshtunnel-@tunnels-tlu1b.oss.local.service.d.service failed because the control process exited with error code.
+
+jun 02 10:25:26 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-tlu1b.oss.local.service.d.service: Control process exited, code=exited, status=1/FAILURE
+-- Subject: Unit process exited
+-- Defined-By: systemd
+
+-- Support: http://www.ubuntu.com/support
+-- An ExecStartPre= process belonging to unit UNIT has exited.
+-- The process' exit code is 'exited' and its exit status is 1.
+jun 02 10:25:26 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-tlu1b.oss.local.service.d.service: Failed with result 'exit-code'.
+-- Subject: Unit failed
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+
+Ubuntu
+Support and management | Ubuntu
+Ubuntu Advantage for Infrastructure offers a single, per-node packaging of the most comprehensive software, security and IaaS support in the industry, with OpenStack support, Kubernetes support included, and Livepatch, Landscape and Extended Security Maintenance to address security and compliance...
+-- The job identifier is 1435.
+jun 02 10:25:26 ivo-ThinkPad-P53 nc[11220]: nc: port number invalid:
+jun 02 10:25:26 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-tlu1b.oss.local.service.d.service: Control process exited, code=exited, status=1/FAILURE
+-- Subject: Unit process exited
+-- Defined-By: systemd
+
+-- Support: http://www.ubuntu.com/support
+-- An ExecStartPre= process belonging to unit UNIT has exited.
+
+Ubuntu
+Support and management | Ubuntu
+Ubuntu Advantage for Infrastructure offers a single, per-node packaging of the most comprehensive software, security and IaaS support in the industry, with OpenStack support, Kubernetes support included, and Livepatch, Landscape and Extended Security Maintenance to address security and compliance...
+	
+croijakkers
+10:27
+nc: port number invalid:
+
+	
+ivo
+10:27
+ja
+
+	
+croijakkers
+10:28
+kijk in je .ssh config file
+
+	
+ivo
+10:28
+Dat is het vreemde
+
+die is er niet. Die heb ik dus aangemaakt en de include erin gezet
+
+	
+croijakkers
+10:28
+ja dat is normaal
+
+	
+ivo
+10:29
+cat config_vf-access | grep 11220
+
+	
+croijakkers
+10:29
+kijk eens bij tunnels-nlvir1ngh01rm1
+
+dat is die wat je nodig hebt voor gitlab
+
+(edited)
+	
+ivo
+10:30
+ahhh
+
+Op dit moment niet aanwezig. kijk de enige twee occurrences van die string, zijn deze:
+
+Host tunnels-nl0553yr.dc-ratingen.de
+    Hostname nl0553yr.dc-ratingen.de
+    User qnhsup
+    GSSAPIAuthentication no
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    HostkeyAlgorithms +ssh-dss
+    DynamicForward 2082
+    LocalForward 15432 oidcpg-vip-acc.dc-ratingen.de:5432
+    ProxyCommand ssh -q nlvir1ngh01rm1 -W %h:%p
+
+Hawaii prod admin server tunnels
+Host tunnels-nl0926yr.dc-ratingen.de
+    Hostname nl0926yr.dc-ratingen.de
+    User qnhsup
+    GSSAPIAuthentication no
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    HostkeyAlgorithms +ssh-dss
+    DynamicForward 2083
+    LocalForward 25432 oidcpg-vip-prd.dc-ratingen.de:5432
+    ProxyCommand ssh -q nlvir1ngh01rm1 -W %h:%p
+
+	
+croijakkers
+10:31
+ja, dan heb je de verkeerde
+
+dat zijn de tunnels voor hawaii
+
+die heb je niet nodig
+
+	
+ivo
+10:31
+Ik had SMC_ziggo gedaan
+
+	
+croijakkers
+10:32
+denk het niet, want dit is noch smc, noch ziggo
+
+begin maar opnieuw
+
+en zeg even welke opties je krijgt
+
+	
+ivo
+10:32
+good
+
+hawai niet dus
+
+smc"
+
+?
+
+	
+croijakkers
+10:34
+ja
+
+	
+ivo
+10:35
+SSHGW?
+
+	
+croijakkers
+10:35
+yes
+
+dat is de belangrijkste
+
+	
+ivo
+10:35
+ok
+
+	
+ivo
+12:17
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- A start job for unit UNIT has begun execution.
+-- 
+-- The job identifier is 21698.
+jun 02 12:15:07 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-nlvir1ngh01rm1.service: Control process exited, code=exited, status=1/FAILURE
+-- Subject: Unit process exited
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- An ExecStartPre= process belonging to unit UNIT has exited.
+-- 
+-- The process' exit code is 'exited' and its exit status is 1.
+jun 02 12:15:07 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-nlvir1ngh01rm1.service: Failed with result 'exit-code'.
+-- Subject: Unit failed
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- The unit UNIT has entered the 'failed' state with result 'exit-code'.
+jun 02 12:15:07 ivo-ThinkPad-P53 systemd[1666]: Failed to start SSH tunnels (openssh session tunnels-nlvir1ngh01rm1).
+-- Subject: A start job for unit UNIT has failed
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- A start job for unit UNIT has finished with a failure.
+-- 
+-- The job identifier is 21698 and the job result is failed.
+
+Host tunnels-nlvir1ngh01rm1
+    User willemsi@rsd.internal.vodafone.nl
+    Hostname 192.168.5.32
+    DynamicForward 1082
+    LocalForward 1526 nlehv1rem01.libertel:1521
+    LocalForward 3129 10.44.160.36:3128
+    LocalForward 3308 nlehv1jvsh01.libertel:3306
+    LocalForward 3309 nlehv1satb01.libertel:3306
+    LocalForward 3310 nlehv1jvsh03.libertel:3306
+    LocalForward 3311 nlehv1selport01.libertel:3306
+    LocalForward 6002 gitlab.ahdnag05.libertel:80
+    LocalForward 8181 10.36.134.5:8080
+    LocalForward 8182 10.36.134.4:8080
+    LocalForward 33201 nl0795yr.dc-ratingen.de:33001
+    LocalForward 33202 nl0796yr.dc-ratingen.de:33001
+    LocalForward 33210 nlcps1dr-vip.dc-ratingen.de:33001
+    LocalForward 33211 nlcps2dr-vip.dc-ratingen.de:33001
+
+     Loaded: loaded (/home/ivo/projects/vf-access-master/openssh/sshtunnel-@.service; enabled; vendor preset: enabled)
+    Drop-In: /home/ivo/projects/vf-access-master/openssh/parts/SSHGW/systemd/sshtunnel-@tunnels-nlvir1ngh01rm1.service.d
+             └─instance.conf
+     Active: activating (auto-restart) (Result: exit-code) since Tue 2020-06-02 12:19:11 CEST; 9s ago
+    Process: 16136 ExecStartPre=/bin/nc -z -w 2 ${CONNTEST_HOST} ${CONNTEST_PORT} (code=exited, status=1/FAILURE)
+
+jun 02 12:19:11 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-nlvir1ngh01rm1.service: Failed with result 'exit-code'.
+jun 02 12:19:11 ivo-ThinkPad-P53 systemd[1666]: Failed to start SSH tunnels (openssh session tunnels-nlvir1ngh01rm1).``
+	
+croijakkers
+12:34
+run eens gewoon ssh tunnels-nlvir1ngh01rm1 met de hand
+
+werkt dat?
+
+	
+ivo
+12:35
+blijft hangen
+
+	
+croijakkers
+12:38
+dan is je vpn niet goed
+
+kom je bij server 192.168.5.32
+
+	
+ivo
+12:42
+niet echt, blijft hangen tidjens het pingen:
+
+ivo@ivo-ThinkPad-P53:~/.config/systemd/user$ ping 192.168.5.32
+PING 192.168.5.32 (192.168.5.32) 56(84) bytes of data.
+
+	
+croijakkers
+12:42
+dat moet je niet probere, check of poort 22 werkt
+
+	
+ivo
+12:42
+Als VPN openstaat, kan ik trouwens nergens meer naartoe, dus er is inderdaad wat mis met de vpn
+
+	
+croijakkers
+12:42
+cedric@PF17W7YM:~$ telnet 192.168.5.32 22
+Trying 192.168.5.32...
+Connected to 192.168.5.32.
+Escape character is '^]'.
+SSH-2.0-OpenSSH_7.4
+
+	
+ivo
+12:43
+Image Pasted at 2020-6-2 12-43.png
+
+Moet de poort erbij ? 443?
+
+	
+croijakkers
+12:44
+je moet ook die .mconnection file gebruiken die in vf-access staat
+
+anders riskeer je niet alle routes te hebben
+
+	
+ivo
+13:02
+ssh tunnels-nlvir1ngh01rm1 werkt nu
+
+systemd nog niet:
+
+Ik ga nog eens het hele riedeltje doen
+
+trouwens, als ik de VPN aan heb staan, kan ik niet meer gebruik maken van het internet
+
+	
+croijakkers
+13:06
+dat zou niet mogen
+
+	
+ivo
+13:19
+iets verder,....
+
+-- The job identifier is 33026.
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: This computer system is for authorized use only. Users have no explicit or implicit expectation of privacy. Any or all uses of this system and all data on th>
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: By using this system, the user consent to such disclosure at the discretion of authorized site personnel. Unauthorized or improper use of this system may res>
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: STOP IMMEDIATELY!!! if you do not agree to the conditions stated in this warning.
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22588]: ssh_askpass: exec(/usr/bin/ssh-askpass): No such file or directory
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: Permission denied, please try again.
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22589]: ssh_askpass: exec(/usr/bin/ssh-askpass): No such file or directory
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: Permission denied, please try again.
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22590]: ssh_askpass: exec(/usr/bin/ssh-askpass): No such file or directory
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: willemsi@rsd.internal.vodafone.nl@192.168.5.32: Permission denied (publickey,password).
+jun 02 13:17:21 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-nlvir1ngh01rm1.service: Main process exited, code=exited, status=255/EXCEPTION
+-- Subject: Unit process exited
+-- Defined-By: systemd
+
+-- Support: http://www.ubuntu.com/support
+-- An ExecStart= process belonging to unit UNIT has exited.
+-- The process' exit code is 'exited' and its exit status is 255.
+jun 02 13:17:21 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-nlvir1ngh01rm1.service: Failed with result 'exit-code'.
+-- Subject: Unit failed
+-- Defined-By: systemd
+
+-- Support: http://www.ubuntu.com/support
+-- The unit UNIT has entered the 'failed' state with result 'exit-code'.
+jun 02 13:17:24 ivo-ThinkPad-P53 gnome-shell[7324]: [7316:7336:0602/131724.298046:ERROR:connection_factory_impl.cc(420)] Failed to connect to MCS endpoint with error -118
+
+Ubuntu
+Support and management | Ubuntu
+Ubuntu Advantage for Infrastructure offers a single, per-node packaging of the most comprehensive software, security and IaaS support in the industry, with OpenStack support, Kubernetes support included, and Livepatch, Landscape and Extended Security Maintenance to address security and compliance...
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: This computer system is for authorized use only. Users have no explicit or implicit expectation of privacy. Any or all uses of this system and all data on th>
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: By using this system, the user consent to such disclosure at the discretion of authorized site personnel. Unauthorized or improper use of this system may res>
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: STOP IMMEDIATELY!!! if you do not agree to the conditions stated in this warning.
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22588]: ssh_askpass: exec(/usr/bin/ssh-askpass): No such file or directory
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: Permission denied, please try again.
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22589]: ssh_askpass: exec(/usr/bin/ssh-askpass): No such file or directory
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: Permission denied, please try again.
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22590]: ssh_askpass: exec(/usr/bin/ssh-askpass): No such file or directory
+jun 02 13:17:21 ivo-ThinkPad-P53 ssh[22587]: willemsi@rsd.internal.vodafone.nl@192.168.5.32: Permission denied (publickey,password).
+jun 02 13:17:21 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-nlvir1ngh01rm1.service: Main process exited, code=exited, status=255/EXCEPTION
+-- Subject: Unit process exited
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- An ExecStart= process belonging to unit UNIT has exited.
+-- 
+-- The process' exit code is 'exited' and its exit status is 255.
+jun 02 13:17:21 ivo-ThinkPad-P53 systemd[1666]: sshtunnel-@tunnels-nlvir1ngh01rm1.service: Failed with result 'exit-code'.
+-- Subject: Unit failed
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- The unit UNIT has entered the 'failed' state with result 'exit-code'.
+jun 02 13:17:24 ivo-ThinkPad-P53 gnome-shell[7324]: [7316:7336:0602/131724.298046:ERROR:connection_factory_impl.cc(420)] Failed to connect to MCS endpoint with error -118
+willemsi@rsd.internal.vodafone.nl@192.168.5.32: Permission denied (publickey,password).
+
+Er is mij nooit ergens om mijn password gevraagd tijdens ./install.sh in openssh directory
+
+Prerequisites:
+User account on required servers (Mainly SSH gateway servers, but also SMC servers)
+Add SSH Public key to required servers for passwordless login
+	
+croijakkers
+13:21
+dat is normaal
+
+je moet ook je ssh private key gebruiken hiervoor
+
+eerst moet je ervoor zorgen dat je met de hand zonder wachtwoord kunt inloggen
+
+dan gaat systemd pas werken
+
+	
+ivo
+13:22
+Moet ik een willekeurige key generern ?
+
+	
+croijakkers
+13:23
+je moet met een ssh key werken
+
+je moet die gebruiken waarvan je de public key op de server hebt staan
+
+
+
+
+
+
+
+
